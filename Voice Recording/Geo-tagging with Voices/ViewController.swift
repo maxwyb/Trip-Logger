@@ -17,6 +17,28 @@ class ViewController: UIViewController, AVAudioRecorderDelegate {
         recordTapped()
     }
     
+    @IBAction func pressPlay(sender: UIButton) {
+        playTapped()
+    }
+    
+    // static function dealing with recording data files
+    func getDocumentsDirectory() -> NSString {
+        
+        let paths = NSSearchPathForDirectoriesInDomains(.DocumentDirectory, .UserDomainMask, true) as [String]
+        let documentsDirectory = paths[0]
+        
+        return documentsDirectory
+        
+    }
+    
+    func getWhistleURL() -> NSURL {
+        let audioFileName = getDocumentsDirectory().stringByAppendingPathComponent("whistle.m4a")
+        let audioURL = NSURL(fileURLWithPath: audioFileName)
+        
+        return audioURL
+    }
+    
+    // UIButton actions
     func recordTapped() {
         if whistleRecorder == nil {
             startRecording()
@@ -26,8 +48,22 @@ class ViewController: UIViewController, AVAudioRecorderDelegate {
     }
     
     func playTapped() {
-        //var alertSound
+        let alertSound = getWhistleURL()
+        print(alertSound)
+        
+        do {
+            try AVAudioSession.sharedInstance().setCategory(AVAudioSessionCategoryPlayback)
+            try AVAudioSession.sharedInstance().setActive(true)
+            
+            try audioPlayer = AVAudioPlayer(contentsOfURL: alertSound)
+            
+        } catch {
+            print("Playback failed.")
+        }
+    
+        audioPlayer.play()
     }
+    
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -59,29 +95,13 @@ class ViewController: UIViewController, AVAudioRecorderDelegate {
     func loadFailUI() {
         print("Fail UI loaded.")
     }
-    
-    // static function dealing with recording data files
-    class func getDocumentsDirectory() -> NSString {
-        
-        let paths = NSSearchPathForDirectoriesInDomains(.DocumentDirectory, .UserDomainMask, true) as [String]
-        let documentsDirectory = paths[0]
-        
-        return documentsDirectory
-        
-    }
-    
-    class func getWhistleURL() -> NSURL {
-        let audioFileName = getDocumentsDirectory().stringByAppendingPathComponent("whistle.m4a")
-        let audioURL = NSURL(fileURLWithPath: audioFileName)
-        
-        return audioURL
-    }
+
     
     // recording functions
     func startRecording() {
         print("Recording started.")
         
-        let audioURL = ViewController.getWhistleURL()
+        let audioURL = getWhistleURL()
         print(audioURL.absoluteString)
         
         let settings = [
@@ -123,7 +143,6 @@ class ViewController: UIViewController, AVAudioRecorderDelegate {
         super.didReceiveMemoryWarning()
         // Dispose of any resources that can be recreated.
     }
-
 
 }
 
